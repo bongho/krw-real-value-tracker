@@ -39,6 +39,87 @@ export default async function Home() {
           </p>
         </header>
 
+        {/* 데이터 메타정보 (v2.5.1) */}
+        {dataset && (() => {
+          const lastUpdate = new Date(dataset.metadata.lastUpdated)
+          const now = new Date()
+          const hoursSinceUpdate = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60))
+          const isRecent = hoursSinceUpdate < 24
+
+          return (
+            <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-lg border border-blue-200 dark:border-slate-600 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📅</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">최종 업데이트</p>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
+                        {lastUpdate.toLocaleString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {hoursSinceUpdate === 0 ? '방금 전' : `${hoursSinceUpdate}시간 전`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 hidden md:block"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🔄</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">업데이트 주기</p>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
+                        일 1회 (매일 자정)
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        다음: 내일 00:00
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 hidden md:block"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📍</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">기준 시점</p>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
+                        {new Date(dataset.metadata.baseDate).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                        기준환율: {dataset.metadata.baseRate.toLocaleString()}원
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 hidden md:block"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📊</span>
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">데이터 포인트</p>
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
+                        {dataset.data.length}개 시계열
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className={`inline-block w-2 h-2 rounded-full ${isRecent ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+                  <span className={isRecent ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}>
+                    {isRecent ? '최신 데이터' : '업데이트 대기 중'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
         {/* 차트 또는 에러 메시지 */}
         {error ? (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
