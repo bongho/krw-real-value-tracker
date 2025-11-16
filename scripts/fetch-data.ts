@@ -24,6 +24,7 @@ import {
 import { fetchCurrentRate } from '../lib/api/exchange-rate'
 import { processRawData } from '../lib/data-processor'
 import type { ExtendedRawDataset } from '../lib/api/types'
+import type { ExtendedKRWData } from '../lib/calculations'
 
 // 환경 변수 로드
 dotenv.config({ path: '.env.local' })
@@ -228,7 +229,7 @@ async function main() {
     const sampleDataset = generateSampleData()
 
     // 최신 데이터만 실제 API 값으로 교체
-    const latestSampleData = sampleDataset.data[sampleDataset.data.length - 1]
+    const latestSampleData = sampleDataset.data[sampleDataset.data.length - 1] as ExtendedKRWData
     latestSampleData.marketRate = currentRate.rate
     latestSampleData.krM2 = krM2Data[krM2Data.length - 1].value
     latestSampleData.usM2 = usM2Data[usM2Data.length - 1].value
@@ -286,7 +287,6 @@ async function main() {
 
     // 메타데이터 업데이트
     sampleDataset.metadata.lastUpdated = new Date().toISOString()
-    sampleDataset.metadata.version = 'v2.0'
     sampleDataset.metadata.sources = {
       krM2: 'ECOS (Bank of Korea)',
       usM2: 'FRED (St. Louis Fed)',
