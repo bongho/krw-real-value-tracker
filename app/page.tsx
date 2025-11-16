@@ -2,18 +2,15 @@ import { KRWChart } from '@/components/KRWChart'
 import { InvestmentSuggestion } from '@/components/InvestmentSuggestion'
 import KeyIndicators from '@/components/KeyIndicators'
 import type { KRWDataset } from '@/lib/calculations'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 async function getData(): Promise<KRWDataset> {
-  // 정적 JSON 파일 로드
-  const res = await fetch('http://localhost:3000/data/krw-data.json', {
-    cache: 'no-store', // 개발 중에는 캐시 비활성화
-  })
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch data')
-  }
-
-  return res.json()
+  // 서버 컴포넌트에서 직접 파일 시스템 읽기
+  // 프로덕션/개발 환경 모두에서 작동
+  const filePath = path.join(process.cwd(), 'public', 'data', 'krw-data.json')
+  const fileContents = await fs.readFile(filePath, 'utf8')
+  return JSON.parse(fileContents)
 }
 
 export default async function Home() {
