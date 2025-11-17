@@ -1,6 +1,7 @@
 import { KRWChart } from '@/components/KRWChart'
 import { InvestmentSuggestion } from '@/components/InvestmentSuggestion'
 import KeyIndicators from '@/components/KeyIndicators'
+import { FAQ } from '@/components/FAQ'
 import type { KRWDataset } from '@/lib/calculations'
 import { promises as fs } from 'fs'
 import path from 'path'
@@ -195,6 +196,9 @@ export default async function Home() {
                 </div>
               </div>
             </div>
+
+            {/* FAQ 섹션 */}
+            <FAQ />
           </>
         ) : (
           <div className="text-center p-12">
