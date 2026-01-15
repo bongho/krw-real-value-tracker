@@ -30,8 +30,14 @@ export async function fetchKoreaM2(
   try {
     const response = await axios.get<EcosResponse>(url)
 
+    // ECOS API 에러 응답 처리
+    if (response.data?.RESULT) {
+      const { CODE, MESSAGE } = response.data.RESULT
+      throw new Error(`ECOS API error [${CODE}]: ${MESSAGE}`)
+    }
+
     if (!response.data?.StatisticSearch?.row) {
-      throw new Error('Invalid ECOS API response')
+      throw new Error('Invalid ECOS API response: StatisticSearch.row not found')
     }
 
     const data = response.data.StatisticSearch.row

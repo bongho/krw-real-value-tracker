@@ -3,10 +3,20 @@
  */
 
 /**
+ * ECOS API 에러 응답 타입
+ */
+export interface EcosErrorResponse {
+  RESULT: {
+    CODE: string
+    MESSAGE: string
+  }
+}
+
+/**
  * ECOS API 응답 타입
  */
 export interface EcosResponse {
-  StatisticSearch: {
+  StatisticSearch?: {
     list_total_count: number
     row: Array<{
       STAT_NAME: string
@@ -16,6 +26,10 @@ export interface EcosResponse {
       DATA_VALUE: string
       TIME: string // YYYYMM 형식
     }>
+  }
+  RESULT?: {
+    CODE: string
+    MESSAGE: string
   }
 }
 
