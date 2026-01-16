@@ -9,7 +9,7 @@ import axios from 'axios'
 import type { EcosResponse, EcosM2Data } from './types'
 
 const ECOS_BASE_URL = 'https://ecos.bok.or.kr/api'
-const STAT_CODE = '101Y004' // 광의통화 M2
+const STAT_CODE = '161Y006' // 광의통화 M2 상품별 구성내역(평잔, 원계열)
 const CYCLE = 'M' // 월별
 
 /**
