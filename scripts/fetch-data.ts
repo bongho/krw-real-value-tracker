@@ -7,9 +7,9 @@
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'
-import { fetchKoreaM2, formatDateForEcos } from '../lib/api/ecos'
 import {
   fetchUSM2,
+  fetchKoreaM2FromFred,
   fetchDXY,
   fetchKoreaBaseRate,
   fetchUSFedRate,
@@ -33,15 +33,14 @@ async function main() {
   console.log('🚀 Starting real data collection from APIs...\n')
 
   // 환경 변수 확인
-  const ecosApiKey = process.env.ECOS_API_KEY
   const fredApiKey = process.env.FRED_API_KEY
   const exchangeRateApiKey = process.env.EXCHANGE_RATE_API_KEY
   const baseDate = process.env.BASE_DATE || '2010-01-01'
   const baseRate = parseInt(process.env.BASE_RATE || '1167')
 
-  if (!ecosApiKey || !fredApiKey || !exchangeRateApiKey) {
+  if (!fredApiKey || !exchangeRateApiKey) {
     console.error('❌ Error: API keys not found in .env.local')
-    console.error('Please set ECOS_API_KEY, FRED_API_KEY, and EXCHANGE_RATE_API_KEY')
+    console.error('Please set FRED_API_KEY and EXCHANGE_RATE_API_KEY')
     process.exit(1)
   }
 
@@ -75,15 +74,14 @@ async function main() {
     // 현재 환율만 추가 (과거 데이터는 무료 플랜에서 제공하지 않음)
     rawData.exchangeRates.push(currentRate)
 
-    // 2. 한국 M2 데이터 가져오기
-    console.log('\n📊 Fetching Korea M2 data from ECOS...')
-    const startDateEcos = formatDateForEcos(new Date(baseDate))
-    const endDateEcos = formatDateForEcos(new Date())
-
-    const krM2Data = await fetchKoreaM2(ecosApiKey, startDateEcos, endDateEcos)
+    // 2. 한국 M2 데이터 가져오기 (FRED API 사용)
+    console.log('\n📊 Fetching Korea M2 data from FRED...')
+    const krM2Data = await fetchKoreaM2FromFred(fredApiKey, baseDate, new Date().toISOString().split('T')[0])
     rawData.krM2 = krM2Data
     console.log(`✓ Korea M2: ${krM2Data.length} data points`)
-    console.log(`  Latest: ${krM2Data[krM2Data.length - 1].value} trillion KRW (${krM2Data[krM2Data.length - 1].date})`)
+    if (krM2Data.length > 0) {
+      console.log(`  Latest: ${krM2Data[krM2Data.length - 1].value.toFixed(1)} trillion KRW (${krM2Data[krM2Data.length - 1].date})`)
+    }
 
     // 3. 미국 M2 데이터 가져오기
     console.log('\n📊 Fetching US M2 data from FRED...')
@@ -288,7 +286,7 @@ async function main() {
     // 메타데이터 업데이트
     sampleDataset.metadata.lastUpdated = new Date().toISOString()
     sampleDataset.metadata.sources = {
-      krM2: 'ECOS (Bank of Korea)',
+      krM2: 'FRED (IMF via MYAGM2KRM189S)',
       usM2: 'FRED (St. Louis Fed)',
       exchangeRate: 'ExchangeRate-API (current only, historical from estimates)',
       dxy: 'FRED (St. Louis Fed)',

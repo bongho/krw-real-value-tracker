@@ -14,7 +14,8 @@ import type { FredResponse, FredM2Data, EconomicIndicatorData } from './types'
 const FRED_BASE_URL = 'https://api.stlouisfed.org/fred/series/observations'
 
 // v1.0 Series
-const M2_SERIES_ID = 'M2SL' // 미국 M2 (Seasonally Adjusted)
+const US_M2_SERIES_ID = 'M2SL' // 미국 M2 (Seasonally Adjusted)
+const KR_M2_SERIES_ID = 'MYAGM2KRM189S' // 한국 M2 (IMF)
 const DXY_SERIES_ID = 'DTWEXBGS' // Nominal Broad U.S. Dollar Index
 
 // v2.0 Series - Priority 1: 자본유출입
@@ -45,7 +46,23 @@ export async function fetchUSM2(
   startDate: string,
   endDate: string
 ): Promise<FredM2Data[]> {
-  return fetchFredSeries(apiKey, M2_SERIES_ID, startDate, endDate)
+  return fetchFredSeries(apiKey, US_M2_SERIES_ID, startDate, endDate)
+}
+
+/**
+ * FRED API에서 한국 M2 데이터 조회 (ECOS 대체)
+ *
+ * @param apiKey - FRED API 키
+ * @param startDate - 시작일 (YYYY-MM-DD)
+ * @param endDate - 종료일 (YYYY-MM-DD)
+ * @returns M2 데이터 배열 (조 원)
+ */
+export async function fetchKoreaM2FromFred(
+  apiKey: string,
+  startDate: string,
+  endDate: string
+): Promise<FredM2Data[]> {
+  return fetchFredSeries(apiKey, KR_M2_SERIES_ID, startDate, endDate)
 }
 
 /**
@@ -228,12 +245,20 @@ async function fetchFredSeries(
 
     const data = response.data.observations
       .filter(obs => obs.value !== '.') // 결측치 제외
-      .map(obs => ({
-        date: obs.date,
-        value: seriesId === M2_SERIES_ID
-          ? parseFloat(obs.value) / 1000 // 십억 달러 -> 조 달러
-          : parseFloat(obs.value), // DXY는 그대로
-      }))
+      .map(obs => {
+        const rawValue = parseFloat(obs.value)
+        let value: number
+
+        if (seriesId === US_M2_SERIES_ID) {
+          value = rawValue / 1000 // 십억 달러 -> 조 달러
+        } else if (seriesId === KR_M2_SERIES_ID) {
+          value = rawValue / 1000 // 십억 원 -> 조 원
+        } else {
+          value = rawValue
+        }
+
+        return { date: obs.date, value }
+      })
 
     return data
   } catch (error) {

@@ -28,11 +28,7 @@ export async function fetchKoreaM2(
   const url = `${ECOS_BASE_URL}/StatisticSearch/${apiKey}/json/kr/1/10000/${STAT_CODE}/${CYCLE}/${startDate}/${endDate}/`
 
   try {
-    console.log(`  ECOS API URL: ${url.replace(apiKey, '***')}`)
     const response = await axios.get<EcosResponse>(url)
-
-    // 디버깅: API 응답 구조 로깅
-    console.log(`  ECOS API response keys: ${Object.keys(response.data || {}).join(', ')}`)
 
     // ECOS API 에러 응답 처리
     if (response.data?.RESULT) {
@@ -41,7 +37,6 @@ export async function fetchKoreaM2(
     }
 
     if (!response.data?.StatisticSearch?.row) {
-      console.error('  ECOS API response:', JSON.stringify(response.data, null, 2))
       throw new Error('Invalid ECOS API response: StatisticSearch.row not found')
     }
 
